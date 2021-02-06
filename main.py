@@ -1,10 +1,10 @@
 import random
 
 def main():
-    board = create_board(10, 10)
-    print(board_to_string(board))
-    place_ships(board, [4, 3, 3, 2, 2, 2, 1, 1, 1, 1])
-    print(board_to_string(board))
+    board_with_ships = create_board(10, 10)
+    place_ships(board_with_ships, [4, 3, 3, 2, 2, 2, 1, 1, 1, 1])
+    game_board = create_board(10, 10)
+    game_loop(board_with_ships, game_board)
 
 def create_board(width, height):
     board =  [['-' for i in range(width)] for j in range(height)]
@@ -71,6 +71,50 @@ def on_board(board, coord):
 def update_board(board, coords):
     for (x, y) in coords:
         board[y][x] = ':'
+
+def game_loop(board_with_ships, game_board):
+    guesses = 0
+    ship_parts = count_in_board(board_with_ships, ':')
+    while not game_over(game_board, ship_parts):
+        print("Guesses: %d" % guesses)
+        print(board_to_string(game_board))
+        pos = wait_for_input()
+        guesses += 1
+        (x, y) = pos_to_coord(pos)
+        if board_with_ships[y][x] == ':':
+            game_board[y][x] = 'x'
+        else:
+            game_board[y][x] = 'o'
+
+def count_in_board(board, c):
+    is_match = lambda i: i == c
+    hits = filter(is_match, [i for row in board for i in row])
+    return len(list(hits))
+
+def game_over(game_board, ship_parts):
+    return count_in_board(game_board, 'x') == ship_parts
+
+
+def wait_for_input():
+    val = input("Guess: ")
+    while not input_valid(val):
+        print("Invalid input '%s', valid format: A1-J10" % val)
+        val = input("Guess: ")
+    return val
+
+def input_valid(val):
+    if len(val) < 2:
+        return False
+    if not val[0].upper() in "ABCDEFGHIJ":
+        return False
+    i = int(val[1:])
+    return i >= 1 and i <= 10
+
+
+def pos_to_coord(pos):
+    x = "ABCDEFGHIJ".index(pos[0].upper())
+    y = int(pos[1:])-1
+    return (x, y)
 
 if __name__ == "__main__":
     main()
