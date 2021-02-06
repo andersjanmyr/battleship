@@ -8,7 +8,7 @@ class Board:
         self.board = [['~' for i in range(width)] for j in range(height)]
 
     def __str__(self):
-        return "   %s\n%s\n" % (self.top_header(), self.rows_with_num())
+        return "   %s\n%s" % (self.top_header(), self.rows_with_num())
 
     def top_header(self):
         start = ord('A')
@@ -52,7 +52,7 @@ def main():
 
     solution_board = Board(width, height)
     place_ships(solution_board, ships)
-    print(solution_board)
+    # print(solution_board)
     game_board = Board(width, height)
     game_loop(solution_board, game_board)
 
@@ -123,8 +123,9 @@ def game_loop(solution_board, game_board):
     guesses = 0
     ship_parts = solution_board.match_count(':')
     while not game_over(game_board, ship_parts):
-        print("Guesses: %d" % guesses)
         print(game_board)
+        print("Guesses: %d" % guesses)
+        print("")
         pos = wait_for_input(game_board.width, game_board.height)
         guesses += 1
         c = pos_to_coord(pos)
@@ -132,6 +133,8 @@ def game_loop(solution_board, game_board):
             game_board.set(c, 'x')
         else:
             game_board.set(c, 'o')
+    print(game_board)
+    print("Board solved in %d guesses." % guesses)
 
 def game_over(game_board, ship_parts):
     return game_board.match_count('x') == ship_parts
