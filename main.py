@@ -68,8 +68,13 @@ def parse_args(args):
     else:
         try:
             ships = list(map(lambda s: int(s), args[3:]))
+            to_large = filter(lambda s: s >= min(width, height), ships)
+
         except:
             raise ValueError("Ships must be numeric values: '%s'" % " ".join(args[3:]))
+        if len(list(to_large)) > 0:
+            raise ValueError("Ships must be smaller than board (%d, %d): '%s'" % (width, height, " ".join(args[3:])))
+
     return (width, height, ships)
 
 def usage():
