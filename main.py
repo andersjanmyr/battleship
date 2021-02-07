@@ -8,11 +8,11 @@ class Board:
         self.board = [['~' for i in range(width)] for j in range(height)]
 
     def __str__(self):
-        return "   %s\n%s" % (self.top_header(), self.rows_with_num())
+        return "%2s %s\n%s" % ("", self.top_header(), self.rows_with_num())
 
     def top_header(self):
-        start = ord('A')
-        header = [chr(i) for i in range(start, start + self.width)]
+        a = ord('A')
+        header = [chr(i) for i in range(a, a + self.width)]
         return " ".join(header)
 
     def rows_with_num(self):
@@ -35,9 +35,8 @@ class Board:
         return 0 <= x < self.width and 0 <= y < self.height
 
     def match_count(self, c):
-        is_match = lambda i: i == c
-        matches = filter(is_match, [i for row in self.board for i in row])
-        return len(list(matches))
+        matches = [i for row in self.board for i in row if i == c]
+        return len(matches)
 
 
 X_INDEX="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -49,7 +48,6 @@ def main():
         print(err)
         usage()
         exit(1)
-
     solution_board = Board(width, height)
     place_ships(solution_board, ships)
     # print(solution_board)
@@ -59,22 +57,23 @@ def main():
 def parse_args(args):
     width = 10 if len(args) < 2 else int(args[1])
     height = 10 if len(args) < 3 else int(args[2])
-    if width > len(X_INDEX):
-        raise ValueError("Max width is: %d" % len(X_INDEX))
-    if height > 50:
-        raise ValueError("Max height is: %d" % 50)
+    max_size = len(X_INDEX)
+    if width > max_size:
+        raise ValueError("Max width is: %d" % max_size)
+    if height > max_size:
+        raise ValueError("Max height is: %d" % max_size)
     if len(sys.argv) < 4:
         ships = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
     else:
+        ships_args = args[3:]
         try:
-            ships = list(map(lambda s: int(s), args[3:]))
-            to_large = filter(lambda s: s >= min(width, height), ships)
-
+            ships = [int(s) for s in ships_args]
         except:
-            raise ValueError("Ships must be numeric values: '%s'" % " ".join(args[3:]))
-        if len(list(to_large)) > 0:
-            raise ValueError("Ships must be smaller than board (%d, %d): '%s'" % (width, height, " ".join(args[3:])))
-
+            raise ValueError("Ships must be numeric: '%s'" % " ".join(ships_args))
+        max_ship_size = min(width, height)
+        to_large = [str(s) for s in ships if s >= max_ship_size]
+        if len(to_large) > 0:
+            raise ValueError("Ships must be smaller than board (%d): '%s'" % (max_ship_size, " ".join(to_large)))
     return (width, height, ships)
 
 def usage():
@@ -115,10 +114,8 @@ def valid_coords(board, coords):
 def valid_coord(board, coord):
     (x, y) = coord
     coords = [(x-1,y), (x,y), (x+1,y), (x,y-1), (x,y+1)]
-    in_bounds = lambda c: board.in_bounds(c)
-    possible = filter(in_bounds, coords)
-    invalid = filter(lambda c: board.get(c) == ':', possible)
-    return len(list(invalid)) == 0
+    invalid = [c for c in coords if board.in_bounds(c) if board.get(c) == ':']
+    return len(invalid) == 0
 
 def update_board(board, coords):
     for c in coords:
@@ -144,7 +141,6 @@ def game_loop(solution_board, game_board):
 def game_over(game_board, ship_parts):
     return game_board.match_count('x') == ship_parts
 
-
 def wait_for_input(width, height):
     val = input("Guess: ")
     while not input_valid(val, width, height):
@@ -162,7 +158,6 @@ def input_valid(val, width, height):
     i = int(val[1:])
     return i >= 1 and i <= height
 
-
 def pos_to_coord(pos):
     x = X_INDEX.index(pos[0].upper())
     y = int(pos[1:])-1
@@ -170,4 +165,3 @@ def pos_to_coord(pos):
 
 if __name__ == "__main__":
     main()
-
